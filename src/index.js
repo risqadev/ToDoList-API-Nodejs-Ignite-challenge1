@@ -41,23 +41,97 @@ app.post('/users', checksExistsUserAccount, (request, response) => {
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user) {
+    return response.status(400).json({ error: "Username not found." })
+  }
+
+  return response.status(200).json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user) {
+    return response.status(400).json({ error: "Username not found." })
+  }
+
+  const { title, deadline } = request.body;
+
+  const newTodo = {
+    id: uuidv4(),
+    title,
+    done: false,
+    deadline: new Date(deadline),
+    created_at: new Date()
+  }
+
+  user.todos.push(newTodo);
+
+  return response.status(201).json(newTodo);
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user) {
+    return response.status(400).json({ error: "Username not found." })
+  }
+
+  const { id } = request.params;
+  const { title, deadline } = request.body;
+
+  const todo = user.todos.find(todo => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "Todo id not found." })
+  }
+
+  todo.title = title;
+  todo.deadline = new Date(deadline);
+
+  return response.status(200).json(todo);
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user) {
+    return response.status(400).json({ error: "Username not found." });
+  }
+
+  const { id } = request.params;
+
+  const todo = user.todos.find(todo => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "Todo id not found." })
+  }
+
+  todo.done = true;
+
+  return response.status(201).json(todo);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user) {
+    return response.status(400).json({ error: "Username not found." });
+  }
+
+  const { id } = request.params;
+
+  const todo = user.todos.find(todo => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "Todo id not found." })
+  }
+
+  user.todos = user.todos.filter(item => item !== todo);
+
+  return response.status(204).send();
 });
 
 module.exports = app;
